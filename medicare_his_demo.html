@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediCare HIS | Demo</title>
+<style>
+:root{--blue:#2563eb;--bg:#f5f7fb;--ink:#172033;--muted:#718096;--line:#e6eaf1;--green:#0f9f78}
+*{box-sizing:border-box}body{margin:0;font-family:Tahoma,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+.layout{display:flex;min-height:100vh}.side{width:240px;background:white;border-right:1px solid var(--line);padding:22px 14px;position:fixed;height:100vh}
+.logo{font-size:20px;font-weight:bold;color:var(--blue);padding:8px 12px 25px}.logo span{display:block;font-size:11px;color:var(--muted);font-weight:normal;margin-top:5px}
+.nav button{width:100%;padding:13px 14px;border:0;background:none;text-align:left;border-radius:10px;color:#526078;font-size:14px;cursor:pointer;margin:3px 0}.nav button.active,.nav button:hover{background:#edf4ff;color:var(--blue)}
+.main{margin-left:240px;width:calc(100% - 240px);padding:26px 30px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}.top h1{font-size:24px;margin:0}.tag{background:#eaf3ff;color:#2563eb;border-radius:20px;padding:7px 12px;font-size:12px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:20px}.card,.panel{background:white;border:1px solid var(--line);border-radius:15px;padding:18px}.card small{color:var(--muted)}.num{font-size:27px;font-weight:bold;margin:12px 0 3px}.panel{margin-bottom:18px}.panel h2{font-size:17px;margin:0 0 16px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+button.primary{background:var(--blue);color:white;border:0;border-radius:9px;padding:10px 15px;cursor:pointer;font-weight:600}button.secondary{background:#eef2f8;border:0;border-radius:9px;padding:9px 13px;cursor:pointer;color:#43516a}button.danger{background:#fee2e2;color:#b91c1c;border:0;border-radius:8px;padding:7px 10px;cursor:pointer}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:12px 9px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:600;background:#fafbfe}tr:last-child td{border-bottom:0}
+input,select,textarea{width:100%;border:1px solid #d9e0eb;border-radius:9px;padding:10px;font:inherit;background:white}textarea{min-height:90px;resize:vertical}label{font-size:13px;color:#526078;display:block;margin-bottom:6px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{margin-bottom:14px}.full{grid-column:1/-1}.actions{display:flex;gap:9px;flex-wrap:wrap}.hide{display:none}.pill{padding:5px 8px;background:#e9f7ef;color:#0f8a5f;border-radius:20px;font-size:11px}.notice{font-size:12px;background:#fff8e6;border:1px solid #f3dfab;padding:12px;border-radius:10px;color:#8a6500;margin-bottom:16px}.muted{color:var(--muted);font-size:13px}.search{max-width:300px}.section{display:none}.section.show{display:block}.aiout{white-space:pre-wrap;background:#f2f7ff;padding:14px;border-radius:10px;line-height:1.7}
+@media(max-width:900px){.side{width:190px}.main{margin-left:190px;width:calc(100% - 190px);padding:18px}.cards{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+@media(max-width:600px){.layout{display:block}.side{position:relative;height:auto;width:100%;padding:10px}.logo{padding-bottom:10px}.nav{display:flex;overflow-x:auto}.nav button{white-space:nowrap;width:auto}.main{margin:0;width:100%;padding:15px}.cards{grid-template-columns:1fr 1fr}.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.top h1{font-size:20px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="side">
+<div class="logo">✚ MediCare HIS <span>Hospital demo system</span></div>
+<div class="nav">
+<button class="active" data-page="dashboard">▦ Dashboard</button>
+<button data-page="patients">♙ ทะเบียนผู้ป่วย</button>
+<button data-page="treatment">✚ บันทึกการรักษา</button>
+<button data-page="pharmacy">▤ ระบบจ่ายยา</button>
+<button data-page="ai">✧ AI ผู้ช่วยวิเคราะห์</button>
+<button data-page="reports">▥ รายงาน</button>
+</div>
+</aside>
+<main class="main">
+<div class="top"><h1 id="title">Dashboard</h1><span class="tag">DEMO • ข้อมูลจำลองเท่านั้น</span></div>
+<div class="notice">ระบบทดลองเท่านั้น ห้ามกรอกข้อมูลผู้ป่วยจริง การวิเคราะห์เป็นตัวอย่าง ไม่ใช่คำแนะนำทางการแพทย์</div>
+
+<section id="dashboard" class="section show">
+<div class="cards">
+<div class="card"><small>ผู้ป่วยในระบบ</small><div class="num" id="countPatients">0</div><small>รายชื่อที่ลงทะเบียน</small></div>
+<div class="card"><small>บันทึกการรักษา</small><div class="num" id="countVisits">0</div><small>รายการทั้งหมด</small></div>
+<div class="card"><small>รายการจ่ายยา</small><div class="num" id="countMeds">0</div><small>รายการที่บันทึก</small></div>
+<div class="card"><small>รายการวันนี้</small><div class="num" id="countToday">0</div><small>การรักษาที่ลงวันที่วันนี้</small></div>
+</div>
+<div class="grid2"><div class="panel"><h2>ผู้ป่วยล่าสุด</h2><div id="recentPatients"></div></div><div class="panel"><h2>รายการรักษาล่าสุด</h2><div id="recentVisits"></div></div></div>
+</section>
+
+<section id="patients" class="section">
+<div class="panel"><h2>ลงทะเบียนผู้ป่วย</h2>
+<form id="patientForm" class="formgrid">
+<div class="field"><label>ชื่อ-นามสกุล *</label><input id="pname" required placeholder="ชื่อผู้ป่วย (ข้อมูลจำลอง)"></div>
+<div class="field"><label>อายุ</label><input id="page" type="number" min="0" max="120" placeholder="อายุ"></div>
+<div class="field"><label>เพศ</label><select id="pgender"><option>ไม่ระบุ</option><option>ชาย</option><option>หญิง</option><option>อื่นๆ</option></select></div>
+<div class="field"><label>เบอร์ติดต่อ (จำลอง)</label><input id="pcontact" placeholder="เบอร์โทร"></div>
+<div class="field full"><label>แพ้ยา / โรคประจำตัว</label><textarea id="pallergy" placeholder="ข้อมูลเพิ่มเติม"></textarea></div>
+<div class="full"><button class="primary">+ บันทึกผู้ป่วย</button></div>
+</form></div>
+<div class="panel"><h2>รายชื่อผู้ป่วย <input class="search" id="patientSearch" placeholder="ค้นหาชื่อ หรือ HN..." style="float:right"></h2><div id="patientTable"></div></div>
+</section>
+
+<section id="treatment" class="section">
+<div class="panel"><h2>บันทึกการรักษา</h2>
+<form id="visitForm" class="formgrid">
+<div class="field"><label>ผู้ป่วย *</label><select id="vpatient" required></select></div>
+<div class="field"><label>วันที่ *</label><input id="vdate" type="date" required></div>
+<div class="field"><label>อาการสำคัญ</label><input id="vsymptoms" placeholder="เช่น ไข้ ปวดศีรษะ"></div>
+<div class="field"><label>สัญญาณชีพ (ตัวอย่าง)</label><input id="vvitals" placeholder="เช่น BP, HR, Temp"></div>
+<div class="field"><label>การวินิจฉัย (แพทย์)</label><input id="vdiagnosis" placeholder="บันทึกการวินิจฉัย"></div>
+<div class="field"><label>ผู้บันทึก</label><input id="vdoctor" placeholder="ชื่อผู้บันทึก"></div>
+<div class="field full"><label>แผนการรักษา / หมายเหตุ</label><textarea id="vplan"></textarea></div>
+<div class="full"><button class="primary">บันทึกการรักษา</button></div>
+</form></div><div class="panel"><h2>ประวัติการรักษา</h2><div id="visitTable"></div></div>
+</section>
+
+<section id="pharmacy" class="section">
+<div class="panel"><h2>บันทึกการจ่ายยา (DEMO)</h2>
+<form id="medForm" class="formgrid">
+<div class="field"><label>ผู้ป่วย *</label><select id="mpatient" required></select></div>
+<div class="field"><label>วันที่ *</label><input id="mdate" type="date" required></div>
+<div class="field"><label>ชื่อยา *</label><input id="mname" required placeholder="ชื่อยา (ตัวอย่าง)"></div>
+<div class="field"><label>จำนวน</label><input id="mqty" placeholder="เช่น 10 เม็ด"></div>
+<div class="field"><label>วิธีใช้</label><input id="mdose" placeholder="ตามคำสั่งผู้สั่งยา"></div>
+<div class="field"><label>ผู้จ่ายยา</label><input id="mpharmacist" placeholder="ชื่อผู้จ่าย"></div>
+<div class="full"><label>หมายเหตุ</label><textarea id="mnote"></textarea></div>
+<div class="full"><button class="primary">บันทึกรายการยา</button></div>
+</form><div class="notice">การจ่ายยาในระบบนี้ไม่มีการตรวจสอบขนาดยา ปฏิกิริยาระหว่างยา หรือข้อห้ามใช้โดยอัตโนมัติ ต้องตรวจสอบโดยเภสัชกร</div></div>
+<div class="panel"><h2>ประวัติการจ่ายยา</h2><div id="medTable"></div></div>
+</section>
+
+<section id="ai" class="section">
+<div class="panel"><h2>✧ AI ผู้ช่วยสรุปข้อมูล (ตัวอย่างแบบ rule-based)</h2>
+<p class="muted">เลือกผู้ป่วยเพื่อสรุปข้อมูลที่บันทึกไว้และแสดงรายการตรวจสอบเบื้องต้น ไม่มีการวินิจฉัยโรคหรือแนะนำยา</p>
+<div class="field"><label>เลือกผู้ป่วย</label><select id="aipatient"></select></div>
+<button class="primary" onclick="analyze()">วิเคราะห์ / สรุปข้อมูล</button>
+<div id="airesult" class="aiout hide" style="margin-top:15px"></div></div>
+<div class="panel"><h2>ขอบเขต AI</h2><ul><li>สรุปอาการและประวัติที่ผู้ใช้บันทึก</li><li>ตรวจว่าข้อมูลสำคัญบางช่องยังว่าง</li><li>แสดงข้อควรตรวจสอบเพื่อให้ผู้ประกอบวิชาชีพประเมิน</li><li>ไม่วินิจฉัย ไม่สั่งยา และไม่ทำนายผลการรักษา</li></ul></div>
+</section>
+
+<section id="reports" class="section">
+<div class="panel"><h2>รายงานสรุป</h2><div id="reportSummary"></div><button class="secondary" onclick="exportCSV()">ดาวน์โหลดรายชื่อผู้ป่วย CSV</button><button class="danger" onclick="resetDemo()" style="margin-left:10px">ล้างข้อมูล DEMO ทั้งหมด</button></div>
+</section>
+</main></div>
+<script>
+const KEY='medicare_his_demo_v1';
+let data=JSON.parse(localStorage.getItem(KEY)||'{"patients":[],"visits":[],"meds":[]}');
+const today=new Date().toISOString().slice(0,10);
+document.getElementById('vdate').value=today;document.getElementById('mdate').value=today;
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function hn(){return 'HN'+String(Date.now()).slice(-7)}
+function patientName(id){return data.patients.find(p=>p.id===id)?.name||'ไม่พบผู้ป่วย'}
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));document.getElementById(b.dataset.page).classList.add('show');document.getElementById('title').textContent=b.textContent.trim();render()}));
+document.getElementById('patientForm').addEventListener('submit',e=>{e.preventDefault();data.patients.unshift({id:hn(),name:pname.value,age:page.value,gender:pgender.value,contact:pcontact.value,allergy:pallergy.value,created:today});e.target.reset();save();alert('บันทึกผู้ป่วยแล้ว (ข้อมูลจำลอง)')});
+document.getElementById('visitForm').addEventListener('submit',e=>{e.preventDefault();data.visits.unshift({id:'V'+Date.now(),patient:vpatient.value,date:vdate.value,symptoms:vsymptoms.value,vitals:vvitals.value,diagnosis:vdiagnosis.value,doctor:vdoctor.value,plan:vplan.value});e.target.reset();vdate.value=today;save();alert('บันทึกการรักษาแล้ว')});
+document.getElementById('medForm').addEventListener('submit',e=>{e.preventDefault();data.meds.unshift({id:'M'+Date.now(),patient:mpatient.value,date:mdate.value,name:mname.value,qty:mqty.value,dose:mdose.value,pharmacist:mpharmacist.value,note:mnote.value});e.target.reset();mdate.value=today;save();alert('บันทึกการจ่ายยาแล้ว')});
+document.getElementById('patientSearch').addEventListener('input',renderPatients);
+function selectOptions(id){let s=document.getElementById(id);s.innerHTML='<option value="">-- เลือกผู้ป่วย --</option>'+data.patients.map(p=>`<option value="${esc(p.id)}">${esc(p.id)} - ${esc(p.name)}</option>`).join('')}
+function renderPatients(){let q=(patientSearch.value||'').toLowerCase();let arr=data.patients.filter(p=>p.name.toLowerCase().includes(q)||p.id.toLowerCase().includes(q));patientTable.innerHTML=arr.length?`<table><thead><tr><th>HN</th><th>ชื่อ</th><th>อายุ</th><th>เพศ</th><th>แพ้ยา/โรคประจำตัว</th><th></th></tr></thead><tbody>${arr.map(p=>`<tr><td>${esc(p.id)}</td><td>${esc(p.name)}</td><td>${esc(p.age||'-')}</td><td>${esc(p.gender)}</td><td>${esc(p.allergy||'-')}</td><td><button class="danger" onclick="delPatient('${p.id}')">ลบ</button></td></tr>`).join('')}</tbody></table>`:'<p class="muted">ยังไม่มีผู้ป่วย</p>'}
+function delPatient(id){if(confirm('ลบผู้ป่วยและรายการที่เชื่อมโยง?')){data.patients=data.patients.filter(p=>p.id!==id);data.visits=data.visits.filter(v=>v.patient!==id);data.meds=data.meds.filter(m=>m.patient!==id);save()}}
+function renderVisits(){visitTable.innerHTML=data.visits.length?`<table><thead><tr><th>วันที่</th><th>ผู้ป่วย</th><th>อาการ</th><th>วินิจฉัย</th><th>ผู้บันทึก</th></tr></thead><tbody>${data.visits.map(v=>`<tr><td>${esc(v.date)}</td><td>${esc(patientName(v.patient))}</td><td>${esc(v.symptoms||'-')}</td><td>${esc(v.diagnosis||'-')}</td><td>${esc(v.doctor||'-')}</td></tr>`).join('')}</tbody></table>`:'<p class="muted">ยังไม่มีประวัติ</p>'}
+function renderMeds(){medTable.innerHTML=data.meds.length?`<table><thead><tr><th>วันที่</th><th>ผู้ป่วย</th><th>ยา</th><th>จำนวน</th><th>วิธีใช้</th><th>ผู้จ่าย</th></tr></thead><tbody>${data.meds.map(m=>`<tr><td>${esc(m.date)}</td><td>${esc(patientName(m.patient))}</td><td>${esc(m.name)}</td><td>${esc(m.qty||'-')}</td><td>${esc(m.dose||'-')}</td><td>${esc(m.pharmacist||'-')}</td></tr>`).join('')}</tbody></table>`:'<p class="muted">ยังไม่มีรายการยา</p>'}
+function render(){countPatients.textContent=data.patients.length;countVisits.textContent=data.visits.length;countMeds.textContent=data.meds.length;countToday.textContent=data.visits.filter(v=>v.date===today).length;selectOptions('vpatient');selectOptions('mpatient');selectOptions('aipatient');renderPatients();renderVisits();renderMeds();recentPatients.innerHTML=data.patients.length?`<table><tr><th>HN</th><th>ชื่อ</th></tr>${data.patients.slice(0,5).map(p=>`<tr><td>${esc(p.id)}</td><td>${esc(p.name)}</td></tr>`).join('')}</table>`:'<p class="muted">ไม่มีข้อมูล</p>';recentVisits.innerHTML=data.visits.length?`<table><tr><th>วันที่</th><th>ผู้ป่วย</th><th>อาการ</th></tr>${data.visits.slice(0,5).map(v=>`<tr><td>${esc(v.date)}</td><td>${esc(patientName(v.patient))}</td><td>${esc(v.symptoms||'-')}</td></tr>`).join('')}</table>`:'<p class="muted">ไม่มีข้อมูล</p>';reportSummary.innerHTML=`<p>ผู้ป่วยจำลองทั้งหมด: <b>${data.patients.length}</b> ราย</p><p>บันทึกการรักษา: <b>${data.visits.length}</b> รายการ</p><p>รายการจ่ายยา: <b>${data.meds.length}</b> รายการ</p>`}
+function analyze(){let id=aipatient.value;let p=data.patients.find(x=>x.id===id);if(!p){alert('กรุณาเลือกผู้ป่วย');return}let visits=data.visits.filter(v=>v.patient===id),meds=data.meds.filter(m=>m.patient===id);let checks=[];if(!p.age)checks.push('• ยังไม่ได้ระบุอายุ');if(!p.allergy)checks.push('• ไม่มีข้อมูลแพ้ยา/โรคประจำตัว ควรซักประวัติเพิ่ม');if(!visits.length)checks.push('• ยังไม่มีบันทึกการรักษา');if(visits.some(v=>!v.vitals))checks.push('• บางรายการไม่มีสัญญาณชีพ');let out=`สรุปข้อมูลผู้ป่วย: ${p.name} (${p.id})\nอายุ: ${p.age||'ไม่ระบุ'} | เพศ: ${p.gender}\nแพ้ยา/โรคประจำตัว: ${p.allergy||'ไม่มีข้อมูล'}\n\nจำนวนบันทึกการรักษา: ${visits.length}\n${visits.slice(0,5).map(v=>`• ${v.date}: อาการ ${v.symptoms||'-'} | บันทึกวินิจฉัย: ${v.diagnosis||'-'} | แผน: ${v.plan||'-'}`).join('\n')||'ไม่มีบันทึก'}\n\nรายการยาในระบบ: ${meds.length}\n${meds.map(m=>`• ${m.date}: ${m.name} (${m.qty||'ไม่ระบุจำนวน'}) วิธีใช้: ${m.dose||'ไม่ระบุ'}`).join('\n')||'ไม่มีรายการยา'}\n\nรายการตรวจสอบข้อมูล:\n${checks.join('\n')||'• ช่องข้อมูลพื้นฐานที่ตรวจได้ครบตามรายการเบื้องต้น'}\n\nข้อจำกัด: เป็นการสรุปและตรวจช่องข้อมูลแบบง่าย ไม่ใช่การวินิจฉัย ต้องให้บุคลากรทางการแพทย์ตรวจสอบข้อมูลก่อนใช้เสมอ.`;airesult.textContent=out;airesult.classList.remove('hide')}
+function exportCSV(){let rows=[['HN','Name','Age','Gender','Contact','Allergy'],...data.patients.map(p=>[p.id,p.name,p.age,p.gender,p.contact,p.allergy])];let csv=rows.map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');let blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='demo-patients.csv';a.click();URL.revokeObjectURL(a.href)}
+function resetDemo(){if(confirm('ล้างข้อมูลทดลองทั้งหมดใช่หรือไม่?')){data={patients:[],visits:[],meds:[]};save()}}
+render();
+</script>
+</body>
+</html>
